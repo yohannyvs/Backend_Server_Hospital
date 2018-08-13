@@ -1,0 +1,14 @@
+{
+    "name": "google-signin-demo",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "lite-server -c ls-config.json"
+    },
+    "author": "Tenryu",
+    "license": "ISC",
+    "devDependencies": {
+        "lite-server": "^2.4.0"
+    }
+}
