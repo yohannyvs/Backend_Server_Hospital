@@ -1,8 +1,7 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
 
-var mdAutenticacion = require('../middlewares/autenticacion');
+var mdAutenticacion = require('../middlewares/autenticacion').verificaToken;
 
 var app = express();
 
@@ -11,7 +10,12 @@ var Usuario = require("../models/usuario");
 // Get - Obtener todos los Usuarios
 app.get('/', (req, res, next) => {
 
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Usuario.find({}, 'nombre email img role')
+        .skip(desde)
+        .limit(5)
         .exec(
             (err, usuarios) => {
                 if (err) {
@@ -22,16 +26,23 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
+                Usuario.countDocuments({}, (err, conteo) => {
+
+                    res.status(200).json({
+                        ok: true,
+                        total: conteo,
+                        usuarios: usuarios
+                    });
+
                 });
+
+
             }
         );
 });
 
 // Put - Actualizar Usuario
-app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/:id', mdAutenticacion, (req, res) => {
 
     var id = req.params.id;
     var body = req.body;
@@ -51,7 +62,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 if (err) {
                     return res.status(400).json({
                         ok: false,
-                        mensaje: 'Error al crear usuario',
+                        mensaje: 'Error al actualizar usuario',
                         errors: err
                     });
                 }
@@ -83,7 +94,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 // Post - Crear nuevo Usuario
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/', mdAutenticacion, (req, res) => {
 
     var body = req.body;
 
@@ -115,7 +126,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 });
 
 // Delete - Borrar Usuario
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/:id', mdAutenticacion, (req, res) => {
 
     var id = req.params.id;
 
